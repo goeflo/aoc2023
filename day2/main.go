@@ -24,13 +24,50 @@ func main() {
 
 	bag := bag{red: 12, green: 13, blue: 14}
 
-	part1(bag, "example_part1.txt")
-	part1(bag, "puzzle.txt")
+	games := readGames("example_part1.txt")
+	part1(bag, games)
+	part2(bag, games)
+
+	games = readGames("puzzle.txt")
+	part1(bag, games)
+	part2(bag, games)
 
 }
 
-func part1(bag bag, filename string) {
-	fmt.Printf("part2 input file: %v\n", filename)
+func part2(bag bag, games []games) {
+	powerSum := 0
+	for _, game := range games {
+		powerSum += getPower(getMinimumBag(game))
+	}
+	fmt.Printf("minimum power sum: %v\n", powerSum)
+}
+
+func getPower(b bag) int {
+	return b.red * b.green * b.blue
+}
+
+func getMinimumBag(games games) bag {
+	minimumBag := bag{red: 0, green: 0, blue: 0}
+	for _, game := range games {
+		if game.red > minimumBag.red {
+			minimumBag.red = game.red
+		}
+		if game.green > minimumBag.green {
+			minimumBag.green = game.green
+		}
+		if game.blue > minimumBag.blue {
+			minimumBag.blue = game.blue
+		}
+	}
+	return minimumBag
+}
+
+func part1(bag bag, games []games) {
+	sum := getPossibleGameSum(bag, games)
+	fmt.Printf("possible game sum: %v\n", sum)
+}
+
+func readGames(filename string) []games {
 	f, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
 	panicIfError(err)
 	defer f.Close()
@@ -40,9 +77,7 @@ func part1(bag bag, filename string) {
 	for scanner.Scan() {
 		allGames = append(allGames, getGame(scanner.Text()))
 	}
-
-	sum := getPossibleGameSum(bag, allGames)
-	fmt.Printf("possible game sum: %v\n", sum)
+	return allGames
 }
 
 func getPossibleGameSum(bag bag, games []games) int {
